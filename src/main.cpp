@@ -185,6 +185,12 @@ int main() {
 
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         glUseProgram(shader_program2);
+        int offset_x_location = glGetUniformLocation(shader_program2, "offset_x");
+        if (-1 == offset_x_location) {
+            std::cout << "ERROR::UNIFORM::offset_x_not_found." << std::endl;
+        } else {
+            glUniform1f(offset_x_location, 0.5f);
+        }
         glBindVertexArray(vao1);
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
