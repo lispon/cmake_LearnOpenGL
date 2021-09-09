@@ -4,6 +4,7 @@
 #include <GLFW/glfw3.h>
 
 #include <iostream>
+#include <math.h>
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
@@ -14,6 +15,7 @@ const unsigned int SCR_HEIGHT = 600;
 
 int main() {
     std::cout << "VERSION:" << VERSION_MAJOR << "." << VERSION_MINOR << std::endl;
+
     // glfw: initialize and configure
     // ------------------------------
     glfwInit();
@@ -45,21 +47,40 @@ int main() {
         return -1;
     }
 
+    // opengl支持的顶点属性个数, 最小且一般为16.
+    int nrAttributes;
+    glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrAttributes);
+    std::cout << "vertex attr max: " << nrAttributes << std::endl;
+
 
     /// 顶点着色器(Vertex Shader).
     const unsigned int vertex_shader = glCreateShader(GL_VERTEX_SHADER);
+    const unsigned int vertex_shader1 = glCreateShader(GL_VERTEX_SHADER);
     {
         /// 使用着色器语言(OpenGL Shading Language, GLSL)编写顶点着色器.
         const char* vertex_shader_source = "#version 330 core\n"
                                            "layout (location = 0) in vec3 aPos;\n"
                                            "void main()\n"
                                            "{\n"
-                                           "  gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-                                           "}\0";
+                                           "  gl_Position = vec4(aPos, 1.0);\n"
+                                           "}\n";
+
+        const char* vertex_shader_source1 = "#version 330 core\n"
+                                            "layout (location = 0) in vec3 aPos;\n"
+                                            "layout (location = 1) in vec3 aColor;\n"
+                                            "out vec3 array_color;\n"
+                                            "void main()\n"
+                                            "{\n"
+                                            "   gl_Position = vec4(aPos, 1.0);\n"
+                                            "   array_color = aColor;\n"
+                                            "}\0";
+
         // 使用源码定义着色器.
         glShaderSource(vertex_shader, 1, &vertex_shader_source, nullptr);
+        glShaderSource(vertex_shader1, 1, &vertex_shader_source1, nullptr);
         // 编译着色器.
         glCompileShader(vertex_shader);
+        glCompileShader(vertex_shader1);
         // 检测编译是否成功.
         int success{0};
         char info_log[512] {};
@@ -76,15 +97,19 @@ int main() {
     {
         /// 使用着色器语言GLSL编写片段着色器.
         const char* fragment_shader_source = "#version 330 core\n"
-                                             "out vec4 FragColor;\n"
+                                             "in vec4 vertex_color;\n"
+                                             "uniform vec4 ufm_color;\n"
+                                             "out vec4 fc;\n"
                                              "void main()\n"
-                                             "{\n"
-                                             "  FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
-                                             "}\0";
+                                             "{ fc = ufm_color; }\0";
+
         const char* fragment_shader_source1 = "#version 330 core\n"
-                                              "out vec4 fc;\n"
+                                              "in vec3 array_color;\n"
+                                              "out vec4 frag_color;\n"
                                               "void main()\n"
-                                              "{ fc = vec4(1.0f, 1.0f, 0.0f, 1.0f); }\0";
+                                              "{\n"
+                                              "  frag_color = vec4(array_color, 1.0f);\n"
+                                              "}\n\0";
 
         // 使用源码定义着色器.
         glShaderSource(fragment_shader, 1, &fragment_shader_source, nullptr);
@@ -111,7 +136,7 @@ int main() {
         glAttachShader(shader_program, fragment_shader);
         glLinkProgram(shader_program);
 
-        glAttachShader(shader_program1, vertex_shader);
+        glAttachShader(shader_program1, vertex_shader1);
         glAttachShader(shader_program1, fragment_shader1);
         glLinkProgram(shader_program1);
 
@@ -191,12 +216,11 @@ int main() {
         // anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
         glBindVertexArray(0);
 
-
-        const float vertices1[] {
-            -0.5f, 0.5f, 0.0f,  // 左上角.
-                0.5f, 0.5f, 0.0f,   // 右上角.
-                0.0f, -0.5f, 0.0f,  // 下中心.
-            };
+        //                        位置               颜色
+        const float vertices1[] { -0.5f, 0.5f, 0.0f,    1.0f, 0.0f, 0.0f,  // 左上角.
+                                  0.5f, 0.5f, 0.0f,     0.0f, 1.0f, 0.0f,  // 右上角.
+                                  0.0f, -0.5f, 0.0f,    0.0f, 0.0f, 1.0f,  // 下中心.
+                                };
         glGenVertexArrays(1, &vao1);
         glGenBuffers(1, &vbo1);
 
@@ -204,8 +228,12 @@ int main() {
         glBindBuffer(GL_ARRAY_BUFFER, vbo1);
         glBufferData(GL_ARRAY_BUFFER, sizeof(vertices1), vertices1, GL_STATIC_DRAW);
 
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+        // 位置属性
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
         glEnableVertexAttribArray(0);
+        // 颜色属性
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+        glEnableVertexAttribArray(1);
     }
 
     // 线框模式(Wireframe Mode).
@@ -227,6 +255,17 @@ int main() {
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         // 绘制图形.
         glUseProgram(shader_program);
+
+        // 更新uniform颜色ufm_color的值.
+        float time_value = glfwGetTime();
+        float red_value = (sin(time_value) / 2.0f) + 0.5f;
+        int vertex_color_location = glGetUniformLocation(shader_program, "ufm_color");
+        if (-1 == vertex_color_location) {
+            std::cout << "ERROR::not found uniform color::ufm_color." << std::endl;
+        } else {
+            glUniform4f(vertex_color_location, red_value, 0.0f, 0.0f, 1.0f);
+        }
+
         // 绑定vao(顶点数组对象)时, 会自动绑定ebo(索引缓冲对象).
         glBindVertexArray(vao);
         // seeing as we only have a single VAO there's no need to bind it every time,
@@ -239,7 +278,7 @@ int main() {
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         glUseProgram(shader_program1);
         glBindVertexArray(vao1);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
 
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
