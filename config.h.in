@@ -1,0 +1,2 @@
+#define VERSION_MAJOR @cmake_LearnOpenGL_VERSION_MAJOR@
+#define VERSION_MINOR @cmake_LearnOpenGL_VERSION_MINOR@
