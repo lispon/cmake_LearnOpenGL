@@ -116,16 +116,31 @@ int main() {
 
     /// 顶点数组对象(Vertex Array Object, VAO).
     unsigned int vao{0};
-    /// 顶点缓存对象(Vertex Buffer Objects, VBO).
+    /// 顶点缓冲对象(Vertex Buffer Objects, VBO).
     unsigned int vbo{0};
+    /// 索引缓冲对象(Element Buffer Objects, ebo; 也称Index Buffer Objects, ibo).
+    unsigned int ebo{0};
     {
         // 右手坐标系坐标.
-        const float vertices[] = { -0.5f, -0.5f, 0.0f, // left.
-                                   0.5f, -0.5f, 0.0f,  // right.
-                                   0.0f, 0.5f, 0.0f,   // top.
-                                 };
+        const float vertices[] { -0.5f, -0.5f, 0.0f, // 左下角.
+                                 0.5f, -0.5f, 0.0f,  // 右下角.
+                                 0.0f, 0.5f, 0.0f,   // 上中心.
+                                 -0.5f, 0.5f, 0.0f,  // 左上角.
+                                 0.5f, 0.5f, 0.0f,   // 右上角.
+                                 0.0f, -0.5f, 0.0f,  // 下中心.
+                               };
+
+        const unsigned int indices[] {
+            0, 1, 2,  // 中心三角形.
+            0, 2, 3,  // 左上三角形.
+            1, 2, 4,  // 右上三角形.
+            0, 1, 3,  // 坐下三角形.
+            0, 1, 4,  // 右下三角形.
+        };
+
         glGenVertexArrays(1, &vao);
         glGenBuffers(1, &vbo);
+        glGenBuffers(1, &ebo);
 
         // bind the Vertex Array Object first,
         // then bind and set vertex buffer(s),
@@ -140,6 +155,10 @@ int main() {
             // GL_DYNAMIC_DRAW 数据会改变很多.
             // GL_STREAM_DRAW 数据每次绘制时都会改变.
             glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+            // 复制我们的索引数组到一个索引缓冲中. 此时, vao中会保存当前索引缓冲对象的绑定状态.
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
             // 设置顶点属性指针.
             glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
@@ -156,8 +175,9 @@ int main() {
         glBindVertexArray(0);
     }
 
-    // uncomment this call to draw in wireframe polygons.
-//    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    // 线框模式(Wireframe Mode).
+    // GL_POINT, GL_LINE, GL_FILL. 三种模式, 分别为点线面, 其中默认为GL_FILL
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 
     // render loop
@@ -173,12 +193,14 @@ int main() {
 
         // 绘制图形.
         glUseProgram(shader_program);
+        // 绑定vao(顶点数组对象)时, 会自动绑定ebo(索引缓冲对象).
         glBindVertexArray(vao);
         // seeing as we only have a single VAO there's no need to bind it every time,
         // but we'll do so to keep things a bit more organized
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glDrawElements(GL_TRIANGLES, 15, GL_UNSIGNED_INT, 0);
         // 没有必要每次都解除绑定.
-        glBindVertexArray(0);
+//        glBindVertexArray(0);
 
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
@@ -190,6 +212,7 @@ int main() {
     // optional: de-allocate all resources once they've outlived their purpose:
     glDeleteVertexArrays(1, &vao);
     glDeleteBuffers(1, &vbo);
+    glDeleteBuffers(1, &ebo);
     glDeleteProgram(shader_program);
 
     // glfw: terminate, clearing all previously allocated GLFW resources.
