@@ -72,6 +72,7 @@ int main() {
 
     /// 片段着色器(Fragment Shader).
     unsigned int fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
+    unsigned int fragment_shader1 = glCreateShader(GL_FRAGMENT_SHADER);
     {
         /// 使用着色器语言GLSL编写片段着色器.
         const char* fragment_shader_source = "#version 330 core\n"
@@ -80,10 +81,17 @@ int main() {
                                              "{\n"
                                              "  FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
                                              "}\0";
+        const char* fragment_shader_source1 = "#version 330 core\n"
+                                              "out vec4 fc;\n"
+                                              "void main()\n"
+                                              "{ fc = vec4(1.0f, 1.0f, 0.0f, 1.0f); }\0";
+
         // 使用源码定义着色器.
         glShaderSource(fragment_shader, 1, &fragment_shader_source, nullptr);
+        glShaderSource(fragment_shader1, 1, &fragment_shader_source1, nullptr);
         // 编译着色器.
         glCompileShader(fragment_shader);
+        glCompileShader(fragment_shader1);
         int success{0};
         char info_log[512] {};
         //
@@ -96,11 +104,17 @@ int main() {
 
     /// 着色器程序(Shader Program Object).
     const unsigned int shader_program = glCreateProgram();
+    const unsigned int shader_program1 = glCreateProgram();
     {
         // 多个着色器合并, 最终链接成着色器程序对象.
         glAttachShader(shader_program, vertex_shader);
         glAttachShader(shader_program, fragment_shader);
         glLinkProgram(shader_program);
+
+        glAttachShader(shader_program1, vertex_shader);
+        glAttachShader(shader_program1, fragment_shader1);
+        glLinkProgram(shader_program1);
+
         int success{0};
         char info_log[512] {};
         // 检测着色器程序状态.
@@ -112,12 +126,15 @@ int main() {
         // 把着色器连接到程序对象后, 即可删除着色器对象.
         glDeleteShader(vertex_shader);
         glDeleteShader(fragment_shader);
+        glDeleteShader(fragment_shader1);
     }
 
     /// 顶点数组对象(Vertex Array Object, VAO).
     unsigned int vao{0};
+    unsigned int vao1{0};
     /// 顶点缓冲对象(Vertex Buffer Objects, VBO).
     unsigned int vbo{0};
+    unsigned int vbo1{0};
     /// 索引缓冲对象(Element Buffer Objects, ebo; 也称Index Buffer Objects, ibo).
     unsigned int ebo{0};
     {
@@ -173,6 +190,22 @@ int main() {
         // but this rarely happens. Modifying other VAOs requires a call to glBindVertexArray
         // anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
         glBindVertexArray(0);
+
+
+        const float vertices1[] {
+            -0.5f, 0.5f, 0.0f,  // 左上角.
+                0.5f, 0.5f, 0.0f,   // 右上角.
+                0.0f, -0.5f, 0.0f,  // 下中心.
+            };
+        glGenVertexArrays(1, &vao1);
+        glGenBuffers(1, &vbo1);
+
+        glBindVertexArray(vao1);
+        glBindBuffer(GL_ARRAY_BUFFER, vbo1);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices1), vertices1, GL_STATIC_DRAW);
+
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+        glEnableVertexAttribArray(0);
     }
 
     // 线框模式(Wireframe Mode).
@@ -191,6 +224,7 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT);
 
 
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         // 绘制图形.
         glUseProgram(shader_program);
         // 绑定vao(顶点数组对象)时, 会自动绑定ebo(索引缓冲对象).
@@ -201,6 +235,11 @@ int main() {
         glDrawElements(GL_TRIANGLES, 15, GL_UNSIGNED_INT, 0);
         // 没有必要每次都解除绑定.
 //        glBindVertexArray(0);
+
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        glUseProgram(shader_program1);
+        glBindVertexArray(vao1);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
 
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
