@@ -1,10 +1,14 @@
 set(HDR_FILES
+    openglwindowbase.h
     shader.h
+    startshader.h
     )
 
 set(SRC_FILES
+    openglwindowbase.cpp
     main.cpp
     shader.cpp
+    startshader.cpp
     )
 
 add_executable(${PROJECT_NAME}
