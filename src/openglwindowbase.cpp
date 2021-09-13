@@ -18,14 +18,6 @@ OpenGLWindowBase::OpenGLWindowBase() {
 OpenGLWindowBase::~OpenGLWindowBase() {
 }
 
-void OpenGLWindowBase::ConstructData() {
-
-}
-
-void OpenGLWindowBase::DestructData() {
-    glfwTerminate();
-}
-
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
 // ---------------------------------------------------------------------------------------------------------
 void OpenGLWindowBase::ProcessInput() {
@@ -33,10 +25,6 @@ void OpenGLWindowBase::ProcessInput() {
         std::cout << "custom close::ESC key pressed." << std::endl;
         glfwSetWindowShouldClose(_glfw_window, true);
     }
-}
-
-void OpenGLWindowBase::Draw() {
-
 }
 
 void OpenGLWindowBase::Show() {

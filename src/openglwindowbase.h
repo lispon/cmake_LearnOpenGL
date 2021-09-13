@@ -14,13 +14,13 @@ class OpenGLWindowBase {
     ~OpenGLWindowBase();
 
     //
-    virtual void ConstructData();
+    virtual void ConstructData() = 0;
     //
-    virtual void DestructData();
+    virtual void DestructData() = 0;
     //
     virtual void ProcessInput();
     //
-    virtual void Draw();
+    virtual void Draw() = 0;
     //
     void Show();
 
