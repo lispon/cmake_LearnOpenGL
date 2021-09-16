@@ -18,7 +18,7 @@ StartTextures::~StartTextures() {
 }
 
 void StartTextures::ConstructData() {
-    Shader shader1("./shader/texture_container.vs", "./shader/texture_container.fs");
+    Shader shader1("./shader/texture_container.vs.glsl", "./shader/texture_container.fs.glsl");
     _program1 = shader1.GetID();
 
     const float vertices[] = {

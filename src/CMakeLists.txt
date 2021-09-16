@@ -28,7 +28,7 @@ add_executable(${PROJECT_NAME}
 file(COPY
     ${PROJECT_SOURCE_DIR}/src/file/
     DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/shader
-    FILES_MATCHING PATTERN "*.fs" PATTERN "*.vs"
+    FILES_MATCHING PATTERN "*.glsl"
     )
 
 # 纹理图片.

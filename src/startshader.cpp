@@ -10,10 +10,10 @@ StartShader::~StartShader() {
 
 void StartShader::ConstructData() {
     auto shader1 = std::make_shared<Shader>
-                   ("./shader/rect.vs", "./shader/rect.fs");
+                   ("./shader/rect.vs.glsl", "./shader/rect.fs.glsl");
     _shader_program1 = shader1->GetID();
     auto shader2 = std::make_shared<Shader>
-                   ("./shader/tri.vs", "./shader/tri.fs");
+                   ("./shader/tri.vs.glsl", "./shader/tri.fs.glsl");
     _shader_program2 = shader2->GetID();
 
 
