@@ -3,6 +3,8 @@
 
 #include "openglwindowbase.h"
 
+#include <memory>
+
 class StartTextures : public OpenGLWindowBase {
   public:
     StartTextures();
@@ -18,7 +20,7 @@ class StartTextures : public OpenGLWindowBase {
 
 
   private:
-    Shader* _shader;
+    std::shared_ptr<Shader> _shader;
 
     float _opacity;
 

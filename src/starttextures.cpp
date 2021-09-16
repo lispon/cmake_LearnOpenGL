@@ -20,7 +20,7 @@ StartTextures::~StartTextures() {
 }
 
 void StartTextures::ConstructData() {
-    _shader = new Shader("./shader/texture_container.vs.glsl", "./shader/texture_container.fs.glsl");
+    _shader = std::make_shared<Shader>("./shader/texture_container.vs.glsl", "./shader/texture_container.fs.glsl");
 
     const float vertices[] {
         //     ---- 位置 ----       ---- 颜色 ----              ---- 纹理坐标 ----
