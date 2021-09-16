@@ -2,6 +2,7 @@ set(HDR_FILES
     openglwindowbase.h
     shader.h
     startshader.h
+    starttextures.h
     )
 
 set(SRC_FILES
@@ -9,6 +10,7 @@ set(SRC_FILES
     main.cpp
     shader.cpp
     startshader.cpp
+    starttextures.cpp
     )
 
 add_executable(${PROJECT_NAME}
@@ -21,8 +23,16 @@ add_executable(${PROJECT_NAME}
 # 注意, 此时的 ${CMAKE_CURRENT_BINARY_DIR} 和 ${CMAKE_BINARY_DIR} 输出的值不同.
 # 准确定位输出的可执行文件路径,
 # 需要在调用 add_executable 的cmakelists.txt 中使用 ${CMAKE_CURRENT_BINARY_DIR} 获取.
+
+# 着色器文件.
 file(COPY
     ${PROJECT_SOURCE_DIR}/src/file/
     DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/shader
     FILES_MATCHING PATTERN "*.fs" PATTERN "*.vs"
+    )
+
+# 纹理图片.
+file(COPY ${PROJECT_SOURCE_DIR}/src/img
+    DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
+    FILES_MATCHING PATTERN "*.jpg" PATTERN "*.png"
     )

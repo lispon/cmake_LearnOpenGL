@@ -28,10 +28,6 @@ void OpenGLWindowBase::ProcessInput() {
 }
 
 void OpenGLWindowBase::Show() {
-    //
-    assert(0 == _unique);
-    ++_unique;
-
     ConstructData();
 
     while (!glfwWindowShouldClose(_glfw_window)) {
@@ -47,6 +43,11 @@ void OpenGLWindowBase::Show() {
 }
 
 bool OpenGLWindowBase::InitWindow() {
+    //
+    assert(0 == _unique);
+    ++_unique;
+
+
     // glfw: initialize and configure
     // ------------------------------
     glfwInit();
