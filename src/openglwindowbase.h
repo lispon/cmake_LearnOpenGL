@@ -24,9 +24,11 @@ class OpenGLWindowBase {
     //
     void Show();
 
+  protected:
+    GLFWwindow* _glfw_window;
+
   private:
     static int _unique;
-    GLFWwindow* _glfw_window;
     const int _width = 800, _height = 600;
     //
     bool InitWindow();

@@ -22,12 +22,31 @@ Shader::Shader(const GLchar* vertex_path, const GLchar* fragment_path)
     glDeleteShader(fragment);
 }
 
+Shader::~Shader() {
+    glDeleteProgram(_id);
+}
+
 unsigned int Shader::GetID() const {
     return _id;
 }
 
-void Shader::Use() {
+void Shader::Use() const {
     glUseProgram(_id);
+}
+
+void Shader::SetBool(const std::string& name, bool value) const {
+    this->Use();
+    glUniform1i(glGetUniformLocation(_id, name.c_str()), int(value));
+}
+
+void Shader::SetFloat(const std::string& name, float value) const {
+    this->Use();
+    glUniform1f(glGetUniformLocation(_id, name.c_str()), value);
+}
+
+void Shader::SetInt(const std::string& name, int value) const {
+    this->Use();
+    glUniform1i(glGetUniformLocation(_id, name.c_str()), int(value));
 }
 
 std::string Shader::ReadFile(const char* path) {

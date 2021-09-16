@@ -11,13 +11,22 @@ class StartTextures : public OpenGLWindowBase {
     void ConstructData() override;
     void DestructData() override;
     void Draw() override;
+    void ProcessInput() override;
 
   private:
+    void SetTextureOpacity(bool up);
+
+
+  private:
+    Shader* _shader;
+
+    float _opacity;
+
     unsigned int _vao;
     unsigned int _vbo;
     unsigned int _ebo;
     unsigned int _texture;
-    unsigned int _program1;
+    unsigned int _texture2;
 };
 
 #endif // STARTTEXTURES_H

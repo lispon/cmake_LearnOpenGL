@@ -12,10 +12,15 @@
 class Shader {
   public:
     explicit Shader(const GLchar* vertex_path, const GLchar* fragment_path);
+    ~Shader();
     //
     unsigned int GetID() const;
     //
-    void Use();
+    void Use() const;
+    //
+    void SetBool(const std::string& name, bool value) const;
+    void SetFloat(const std::string& name, float value) const;
+    void SetInt(const std::string& name, int value) const;
 
 
   private:
