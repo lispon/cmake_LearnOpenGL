@@ -26,7 +26,7 @@ Shader::~Shader() {
     glDeleteProgram(_id);
 }
 
-unsigned int Shader::GetID() const {
+unsigned int Shader::ID() const {
     return _id;
 }
 

@@ -12,7 +12,6 @@ StartTextures::StartTextures()
       _ebo(0),
       _texture(0),
       _texture2(0) {
-
 }
 
 StartTextures::~StartTextures() {
@@ -121,8 +120,25 @@ void StartTextures::Draw() {
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, _texture2);
 
+    // 旋转.
+    glm::mat4 trans4 = glm::mat4(1.0f);
+    trans4 = glm::translate(trans4, glm::vec3(0.5f, -0.5f, 0.0f));
+    trans4 = glm::rotate(trans4, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
     _shader->Use();
+    unsigned int trans_from_loc = glGetUniformLocation(_shader->ID(), "trans_mat4");
+    glUniformMatrix4fv(trans_from_loc, 1, GL_FALSE, glm::value_ptr(trans4));
+
+//    _shader->Use();
     glBindVertexArray(_vao);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+    glm::mat4 trans_left = glm::mat4(1.0f);
+    trans_left = glm::translate(trans_left, glm::vec3(-0.5f, 0.5f, 0.0));
+    const float sc = glm::abs(glm::sin(glfwGetTime()));
+    trans_left = glm::scale(trans_left,  glm::vec3(sc, sc, sc));
+
+//    _shader->Use();
+    glUniformMatrix4fv(trans_from_loc, 1, GL_FALSE, glm::value_ptr(trans_left));
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 

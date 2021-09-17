@@ -14,7 +14,7 @@ class Shader {
     explicit Shader(const GLchar* vertex_path, const GLchar* fragment_path);
     ~Shader();
     //
-    unsigned int GetID() const;
+    unsigned int ID() const;
     //
     void Use() const;
     //
