@@ -20,7 +20,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
     ${OPENGL_gl_LIBRARY}
-    glad glfw
+    glad glfw gflags::gflags
     )
 
 message("glfw_build_DOCS:${GLFW_BUILD_DOCS}")

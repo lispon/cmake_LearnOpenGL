@@ -1,23 +1,14 @@
-﻿set(HDR_FILES
-    hello_window.h
-    openglwindowbase.h
-    shader.h
-    startshader.h
-    starttextures.h
-    )
-
-set(SRC_FILES
-    openglwindowbase.cpp
-    main.cpp
-    shader.cpp
-    startshader.cpp
-    starttextures.cpp
-    )
+﻿file(GLOB HDR_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
+file(GLOB SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 
 add_executable(${PROJECT_NAME}
-    ${HDR_FILES}
-    ${SRC_FILES}
-    )
+)
+
+target_sources(${PROJECT_NAME}
+    PRIVATE
+        ${HDR_FILES}
+        ${SRC_FILES}
+)
 
 
 # 复制着色器文件到可执行目录的./shader文件夹内.
