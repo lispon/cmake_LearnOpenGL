@@ -115,6 +115,8 @@ void StartTextures::DestructData() {
 }
 
 void StartTextures::Draw() {
+    glClear(GL_COLOR_BUFFER_BIT);
+
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, _texture);
     glActiveTexture(GL_TEXTURE1);
