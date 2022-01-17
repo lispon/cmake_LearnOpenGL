@@ -1,6 +1,6 @@
-cmake_minimum_required(VERSION 3.10)
+﻿cmake_minimum_required(VERSION 3.10)
 
-project(cmake_LearnOpenGL VERSION 1.0.0)
+project(cmake_LearnOpenGL VERSION 0.0.1)
 
 cmake_policy(SET CMP0079 NEW)
 
