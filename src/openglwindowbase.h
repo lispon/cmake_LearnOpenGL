@@ -1,4 +1,4 @@
-#ifndef OPENGLWINDOWBASE_H
+﻿#ifndef OPENGLWINDOWBASE_H
 #define OPENGLWINDOWBASE_H
 
 #include "shader.h"

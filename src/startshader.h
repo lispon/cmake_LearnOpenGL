@@ -1,4 +1,4 @@
-#ifndef STARTSHADER_H
+﻿#ifndef STARTSHADER_H
 #define STARTSHADER_H
 
 #include "openglwindowbase.h"

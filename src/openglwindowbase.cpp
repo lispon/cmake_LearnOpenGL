@@ -1,4 +1,4 @@
-#include "openglwindowbase.h"
+﻿#include "openglwindowbase.h"
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
 // ---------------------------------------------------------------------------------------------

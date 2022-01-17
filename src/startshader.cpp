@@ -1,4 +1,4 @@
-#include "startshader.h"
+﻿#include "startshader.h"
 
 StartShader::StartShader()
     : _shader_program1(0)

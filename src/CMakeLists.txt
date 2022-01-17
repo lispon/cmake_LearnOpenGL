@@ -1,4 +1,5 @@
-set(HDR_FILES
+﻿set(HDR_FILES
+    hello_window.h
     openglwindowbase.h
     shader.h
     startshader.h

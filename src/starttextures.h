@@ -1,4 +1,4 @@
-#ifndef STARTTEXTURES_H
+﻿#ifndef STARTTEXTURES_H
 #define STARTTEXTURES_H
 
 #include "openglwindowbase.h"
