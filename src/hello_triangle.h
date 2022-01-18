@@ -4,6 +4,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include <cassert>
 #include <functional>
 #include <iostream>
 
@@ -11,7 +12,7 @@ void frame_buffer_size_callback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
 }
 
-int HelloTriangle() {
+int Triangle(int type) {
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -72,21 +73,44 @@ int HelloTriangle() {
     glDeleteShader(fragment_shader);
 
 
-
-    const float vertices[] = {
-        -0.5f, -0.5f, 0.0f,
-         0.5f, -0.5f, 0.0f,
-         0.0f,  0.5f, 0.0f,
-    };
-
     unsigned int vao = { 0 };
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
     {
+        const float vertices[] = {
+            -0.5f, -0.5f, 0.0f,         // 左下角
+             0.5f, -0.5f, 0.0f,         // 右下角
+             0.5f,  0.5f, 0.0f,         // 右上角
+            -0.5f,  0.5f, 0.0f,         // 左上角
+             0.0f,  0.5f, 0.0f,         // 上中点
+        };
+
+        unsigned int ebo = { 0 };
+        glGenBuffers(1, &ebo);
+
+
         unsigned int vbo = { 0 };
         glGenBuffers(1, &vbo);
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
         glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+        if(1 == type) {
+            const unsigned int indices_triangle[] = {
+                0, 1, 4,
+            };
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices_triangle), indices_triangle, GL_STATIC_DRAW);
+        } else if(2 == type) {
+            const unsigned int indices[] = {
+                0, 1, 2,                    // 右下三角形
+                0, 2, 3,                    // 左上三角形
+            };
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+        } else {
+            glfwTerminate();
+            assert(false);
+            return -1;
+        }
 
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), reinterpret_cast<void*>(0));
         glEnableVertexAttribArray(0);
@@ -100,13 +124,29 @@ int HelloTriangle() {
 
         glUseProgram(shader_program);
         glBindVertexArray(vao);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        if(1 == type) {
+//        glDrawArrays(GL_TRIANGLES, 0, 3);
+            glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
+        } else if(2 == type) {
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        }
+        glBindVertexArray(0);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
     glfwTerminate();
     return 0;
+}
+
+
+int HelloTriangle() {
+    return Triangle(1);
+}
+
+int HelloRectangle() {
+    return Triangle(2);
 }
 
 #endif // HELLO_TRIANGLE_H

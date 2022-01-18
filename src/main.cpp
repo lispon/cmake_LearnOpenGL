@@ -23,6 +23,10 @@ static bool ValidateExe(const char* flagname, uint32_t value) {
         fun_exe =&HelloTriangle;
         break;
     }
+    case 2: {
+        fun_exe = &HelloRectangle;
+        break;
+    }
     default: {
         fun_exe = [value](){ std::cout << "not support 'exe' value:" << value << std::endl; };
         assert(false);
