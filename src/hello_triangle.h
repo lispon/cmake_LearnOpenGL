@@ -33,11 +33,12 @@ int Triangle(int type) {
     unsigned int vertex_shader = { 0 };
     const char* vertex_shader_source = "#version 330 core\n"
                                        "layout (location = 0) in vec3 aPos;\n"
+                                       "layout (location = 1) in vec3 aColor;\n"
                                        "out vec4 vertexColor;\n"
                                        "void main()\n"
                                        "{\n"
                                        "    gl_Position = vec4(aPos, 1.0);\n"
-                                       "    vertexColor = vec4(0.5, 0.0, 0.0, 1.0);\n"
+                                       "    vertexColor = vec4(aColor, 1.0);\n"
                                        "}\n";
     vertex_shader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertex_shader, 1, &vertex_shader_source, nullptr);
@@ -57,7 +58,7 @@ int Triangle(int type) {
                                          "uniform vec4 ourColor;\n"
                                          "void main()\n"
                                          "{\n"
-                                         "    FragColor = ourColor;\n"
+                                         "    FragColor = vertexColor;\n"
                                          "}\n";
     fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragment_shader, 1, &fragment_shader_source, nullptr);
@@ -83,15 +84,12 @@ int Triangle(int type) {
     glBindVertexArray(vao);
     {
         const float vertices[] = {
-            -0.5f, -0.5f, 0.0f,         // 左下角
-             0.5f, -0.5f, 0.0f,         // 右下角
-             0.5f,  0.5f, 0.0f,         // 右上角
-            -0.5f,  0.5f, 0.0f,         // 左上角
-             0.0f,  0.5f, 0.0f,         // 上中点
+            -0.5f, -0.5f, 0.0f,         1.0f, 0.0f, 0.0f,        // 左下角
+             0.5f, -0.5f, 0.0f,         1.0f, 1.0f, 0.0f,        // 右下角
+             0.5f,  0.5f, 0.0f,         1.0f, 1.0f, 1.0f,        // 右上角
+            -0.5f,  0.5f, 0.0f,         0.0f, 1.0f, 1.0f,        // 左上角
+             0.0f,  0.5f, 0.0f,         0.0f, 0.0f, 1.0f,        // 上中点
         };
-
-        unsigned int ebo = { 0 };
-        glGenBuffers(1, &ebo);
 
 
         unsigned int vbo = { 0 };
@@ -99,7 +97,11 @@ int Triangle(int type) {
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
         glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+        if(1 == type || 2 == type) {
+            unsigned int ebo = { 0 };
+            glGenBuffers(1, &ebo);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+        }
         if(1 == type) {
             const unsigned int indices_triangle[] = {
                 0, 1, 4,
@@ -111,14 +113,20 @@ int Triangle(int type) {
                 0, 2, 3,                    // 左上三角形
             };
             glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+        } else if(3 == type) {
+            //
         } else {
             glfwTerminate();
             assert(false);
             return -1;
         }
 
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), reinterpret_cast<void*>(0));
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), reinterpret_cast<void*>(0));
         glEnableVertexAttribArray(0);
+
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float),
+                              reinterpret_cast<void*>(3 * sizeof(float)));
+        glEnableVertexAttribArray(1);
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
@@ -147,6 +155,8 @@ int Triangle(int type) {
             glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
         } else if(2 == type) {
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        } else if(3 == type) {
+            glDrawArrays(GL_TRIANGLES, 0, 3);
         }
         glBindVertexArray(0);
 
@@ -164,6 +174,10 @@ int HelloTriangle() {
 
 int HelloRectangle() {
     return Triangle(2);
+}
+
+int HelloVertexColor() {
+    return Triangle(3);
 }
 
 #endif // HELLO_TRIANGLE_H

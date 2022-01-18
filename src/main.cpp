@@ -16,15 +16,23 @@ static bool ValidateExe(const char* flagname, uint32_t value) {
     std::function<void(void)> fun_exe;
     switch (value) {
     case 0:{
+        // 显示默认空窗口.
         fun_exe = &HelloWindow;
         break;
     }
     case 1: {
+        // 使用索引缓冲对象(EBO)显示三角形
         fun_exe =&HelloTriangle;
         break;
     }
     case 2: {
+        // 使用索引缓冲对象(EBO)显示矩形.
         fun_exe = &HelloRectangle;
+        break;
+    }
+    case 3: {
+        // 显示三角形.
+        fun_exe = &HelloVertexColor;
         break;
     }
     default: {
@@ -46,7 +54,7 @@ int main(int argc, char* argv[]) {
     gflags::SetUsageMessage("usageMessage.");
     gflags::SetVersionString("0.0.1");
     gflags::ParseCommandLineFlags(&argc, &argv, true);
-    std::cout << "gflags-curent-exe:" << FLAGS_exe << std::endl;
+    std::cout << "gflags-current-exe:" << FLAGS_exe << std::endl;
 
 
 //    StartShader wgt1;
