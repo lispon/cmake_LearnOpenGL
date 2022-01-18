@@ -1,6 +1,8 @@
 ﻿file(GLOB HDR_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
 file(GLOB SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
+file(GLOB GLSL_FILES ${CMAKE_CURRENT_SOURCE_DIR}/file/*.glsl)
 
+message("GLSL: ${GLSL}")
 add_executable(${PROJECT_NAME}
 )
 
@@ -8,6 +10,12 @@ target_sources(${PROJECT_NAME}
     PRIVATE
         ${HDR_FILES}
         ${SRC_FILES}
+        ${GLSL_FILES}
+)
+
+source_group(GLSL
+    FILES
+        ${GLSL_FILES}
 )
 
 
