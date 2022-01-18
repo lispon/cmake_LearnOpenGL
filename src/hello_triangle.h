@@ -5,6 +5,7 @@
 #include <GLFW/glfw3.h>
 
 #include <cassert>
+#include <cmath>
 #include <functional>
 #include <iostream>
 
@@ -53,9 +54,10 @@ int Triangle(int type) {
     const char* fragment_shader_source = "#version 330 core\n"
                                          "out vec4 FragColor;\n"
                                          "in vec4 vertexColor;\n"
+                                         "uniform vec4 ourColor;\n"
                                          "void main()\n"
                                          "{\n"
-                                         "    FragColor = vertexColor;\n"
+                                         "    FragColor = ourColor;\n"
                                          "}\n";
     fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragment_shader, 1, &fragment_shader_source, nullptr);
@@ -125,9 +127,21 @@ int Triangle(int type) {
     while(!glfwWindowShouldClose(window)) {
         glClear(GL_COLOR_BUFFER_BIT);
 
+        {
+            double time_value = glfwGetTime();
+            float green_value = (sin(time_value) / 2.0f) + 0.5f;
+            int vertex_color_location = glGetUniformLocation(shader_program, "ourColor");
+#if 0
+            glUniform4f(vertex_color_location, 0.0f, green_value, 0.0f, 1.0f);
+#else
+            const float fv[] = {0.0f, green_value, 0.0f, 1.0f};
+            glUniform1fv(vertex_color_location, 4, fv);
+#endif
+        }
+
         glUseProgram(shader_program);
         glBindVertexArray(vao);
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         if(1 == type) {
 //        glDrawArrays(GL_TRIANGLES, 0, 3);
             glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
