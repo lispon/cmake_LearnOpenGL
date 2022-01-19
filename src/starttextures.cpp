@@ -1,7 +1,11 @@
 ﻿#include "starttextures.h"
 
-#define STB_IMAGE_IMPLEMENTATION
+
+#ifndef STB_IMAGE_STATIC
+#define STB_IMAGE_STATIC
 #include "stb_image.h"
+#endif
+
 
 
 StartTextures::StartTextures()
