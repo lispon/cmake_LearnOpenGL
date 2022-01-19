@@ -5,6 +5,8 @@
 #include "hello_window.h"
 #include "hello_triangle.h"
 
+#include "glm_demo.h"
+
 #include "gflags/gflags.h"
 
 #include <glad/glad.h>
@@ -51,11 +53,13 @@ DEFINE_validator(exe, &ValidateExe);
 
 int main(int argc, char* argv[]) {
     std::cout << "VERSION:" << VERSION_MAJOR << "." << VERSION_MINOR << "." << VERSION_PATCH << std::endl;
+
+    HelloGlm();
+
     gflags::SetUsageMessage("usageMessage.");
     gflags::SetVersionString("0.0.1");
     gflags::ParseCommandLineFlags(&argc, &argv, true);
     std::cout << "gflags-current-exe:" << FLAGS_exe << std::endl;
-
 
 //    StartShader wgt1;
 //    wgt1.Show();

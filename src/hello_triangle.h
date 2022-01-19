@@ -4,6 +4,9 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #ifndef STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
@@ -42,11 +45,12 @@ int Triangle(int type) {
                                        "layout (location = 0) in vec3 aPos;\n"
                                        "layout (location = 1) in vec3 aColor;\n"
                                        "layout (location = 2) in vec2 aTexCoord;\n"
+                                       "uniform mat4 trans;\n"
                                        "out vec4 vertexColor;\n"
                                        "out vec2 TexCoord;\n"
                                        "void main()\n"
                                        "{\n"
-                                       "    gl_Position = vec4(aPos, 1.0);\n"
+                                       "    gl_Position = trans * vec4(aPos, 1.0);\n"
                                        "    vertexColor = vec4(aColor, 1.0);\n"
                                        "    TexCoord = aTexCoord;\n"
                                        "}\n";
@@ -199,8 +203,18 @@ int Triangle(int type) {
 
     glUseProgram(shader_program);
 
+
     while(!glfwWindowShouldClose(window)) {
         glClear(GL_COLOR_BUFFER_BIT);
+
+        //
+        glm::mat4 m4(1.0f);
+        m4 = glm::translate(m4, glm::vec3(.5f, -.5f, .0f));
+    //    m4 = glm::rotate(m4, glm::radians(40.0f), glm::vec3(.0f, .0f, 1.0f));
+        m4 = glm::rotate(m4, static_cast<float>(glfwGetTime()), glm::vec3(.0f, .0f, 1.0f));
+        m4 = glm::scale(m4, glm::vec3(.5f, .5f, .5f));
+        unsigned int transform_location = glGetUniformLocation(shader_program, "trans");
+        glUniformMatrix4fv(transform_location, 1, GL_FALSE, glm::value_ptr(m4));
 
         {
             double time_value = glfwGetTime();
