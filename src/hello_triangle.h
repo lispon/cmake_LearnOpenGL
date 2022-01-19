@@ -68,9 +68,10 @@ int Triangle(int type) {
                                          "in vec2 TexCoord;\n"
                                          "uniform vec4 ourColor;\n"
                                          "uniform sampler2D ourTexture;\n"
+                                         "uniform sampler2D ourTexture1;\n"
                                          "void main()\n"
                                          "{\n"
-                                         "    FragColor = texture(ourTexture, TexCoord) * vertexColor;\n"
+                                         "    FragColor = mix(texture(ourTexture, TexCoord) * vertexColor, texture(ourTexture1, TexCoord), 0.2);\n"
                                          "}\n";
     fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragment_shader, 1, &fragment_shader_source, nullptr);
@@ -91,19 +92,21 @@ int Triangle(int type) {
     glDeleteShader(fragment_shader);
 
 
-    unsigned int texture = { 0 };
+    unsigned int texture[] = { 0, 0 };
     unsigned int vao = { 0 };
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
     {
-        glGenTextures(1, &texture);
+        glGenTextures(sizeof(texture), texture);
         // 默认自动激活纹理单元0
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, texture);
+//        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture[0]);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        stbi_set_flip_vertically_on_load(true);
 
         int img_width = 0, img_height = 0, img_channels = 0;
         const char* img_name = "img/container.jpg";
@@ -115,8 +118,29 @@ int Triangle(int type) {
             std::cout << "Failed to load texture img:" << img_name << std::endl;
         }
         stbi_image_free(img_data);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, 0);
+
+//        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, texture[1]);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        img_width = img_height = img_channels = 0;
+        const char* img_name2 = "img/awesomeface.png";
+        unsigned char* img_data2 = stbi_load(img_name2, &img_width, &img_height, &img_channels, 0);
+        if(img_data2) {
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img_width, img_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, img_data2);
+            glGenerateMipmap(GL_TEXTURE_2D);
+        } else {
+            std::cout << "Failed to load texture img:" << img_name2 << std::endl;
+        }
+        stbi_image_free(img_data2);
+
+
+        glUseProgram(shader_program);
+        // don't forget to acctivate/use the shader program before setting uniforms.
+        glUniform1i(glGetUniformLocation(shader_program, "ourTexture"), 0);
+        glUniform1i(glGetUniformLocation(shader_program, "ourTexture1"), 1);
 
 
         const float vertices[] = {
@@ -173,6 +197,8 @@ int Triangle(int type) {
         glBindVertexArray(0);
     }
 
+    glUseProgram(shader_program);
+
     while(!glfwWindowShouldClose(window)) {
         glClear(GL_COLOR_BUFFER_BIT);
 
@@ -191,8 +217,10 @@ int Triangle(int type) {
         }
 
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, texture);
-        glUseProgram(shader_program);
+        glBindTexture(GL_TEXTURE_2D, texture[0]);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, texture[1]);
+
         glBindVertexArray(vao);
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         if(1 == type) {
@@ -208,6 +236,8 @@ int Triangle(int type) {
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
+    glDeleteVertexArrays(1, &vao);
+
     glfwTerminate();
     return 0;
 }
