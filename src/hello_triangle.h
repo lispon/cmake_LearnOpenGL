@@ -258,6 +258,19 @@ int Triangle(int type) {
     glEnable(GL_DEPTH_TEST);
 //    glDisable(GL_DEPTH_TEST);
 
+    const glm::vec3 cube_positions[] = {
+      glm::vec3( 0.0f,  0.0f,  0.0f),
+      glm::vec3( 2.0f,  5.0f, -15.0f),
+      glm::vec3(-1.5f, -2.2f, -2.5f),
+      glm::vec3(-3.8f, -2.0f, -12.3f),
+      glm::vec3( 2.4f, -0.4f, -3.5f),
+      glm::vec3(-1.7f,  3.0f, -7.5f),
+      glm::vec3( 1.3f, -2.0f, -2.5f),
+      glm::vec3( 1.5f,  2.0f, -2.5f),
+      glm::vec3( 1.5f,  0.2f, -1.5f),
+      glm::vec3(-1.3f,  1.0f, -1.5f)
+    };
+    const int cube_size = sizeof(cube_positions) / sizeof(glm::vec3);
 
     while(!glfwWindowShouldClose(window)) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -315,7 +328,19 @@ int Triangle(int type) {
         } else if(3 == type) {
             glDrawArrays(GL_TRIANGLES, 0, 3);
         } else if(4 == type) {
-            glDrawArrays(GL_TRIANGLES, 0, 36);
+            for(int i = 0; i < cube_size; ++i) {
+                glm::mat4 model(1.0f);
+                model = glm::translate(model, cube_positions[i]);
+                model = glm::rotate(model, static_cast<float>(glfwGetTime()) * glm::radians(20.0f * i + 10),
+                                    glm::vec3(.5f, 1.0f, .0f));
+
+                m4 = projection * view * model;
+
+                unsigned int transform_location = glGetUniformLocation(shader_program, "trans");
+                glUniformMatrix4fv(transform_location, 1, GL_FALSE, glm::value_ptr(m4));
+
+                glDrawArrays(GL_TRIANGLES, 0, 36);
+            }
         }
         glBindVertexArray(0);
 
