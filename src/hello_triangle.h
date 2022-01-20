@@ -156,6 +156,7 @@ int Triangle(int type) {
              0.0f,  0.5f, 0.0f,         0.0f, 0.0f, 1.0f,       0.0f, 2.0f,     // 上中点
         };
 
+        int size_vertices = sizeof(vertices1);
         float* vertices = vertices1;
 
         if(4 == type) {
@@ -203,16 +204,12 @@ int Triangle(int type) {
                 -0.5f,  0.5f, -0.5f,      1.0f, 0.0f, 0.0f,           0.0f, 1.0f
             };
             vertices = vertices2;
+            size_vertices = sizeof(vertices2);
         }
-
 
         unsigned int vbo = { 0 };
         glGenBuffers(1, &vbo);
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        int size_vertices = sizeof(vertices1);
-        if(4 == type) {
-            size_vertices = 36 * 8;
-        }
         glBufferData(GL_ARRAY_BUFFER, size_vertices, vertices, GL_STATIC_DRAW);
 
         if(1 == type || 2 == type) {
@@ -269,11 +266,11 @@ int Triangle(int type) {
         glm::mat4 projection(1.0f), view(1.0f), model(1.0f);
         model = glm::rotate(model, static_cast<float>(glfwGetTime()) * glm::radians(50.0f),
                             glm::vec3(.5f, 1.0f, .0f));
-        view = glm::translate(view, glm::vec3(.0f, .0f, -1.0f));
+        view = glm::translate(view, glm::vec3(.0f, .0f, -3.0f));
         // 教程中提到, 一般设置视野角度(Field of View, fov) 为 45.0f, 获得一个真实的观察效果.
         // 可以设置一个更大的值来获得一个末日风格的效果.
         // 函数的第二个参数为宽高比, 由视口(viewport)的宽除以高所得.
-        projection = glm::perspective(glm::radians(90.0f), 1.0f, .1f, 100.0f);
+        projection = glm::perspective(glm::radians(90.0f), float(4.0/3.0), .1f, 100.0f);
         //
         glm::mat4 m4(1.0f);
     //    m4 = glm::translate(m4, glm::vec3(.5f, -.5f, .0f));
