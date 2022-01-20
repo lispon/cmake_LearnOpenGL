@@ -203,18 +203,31 @@ int Triangle(int type) {
 
     glUseProgram(shader_program);
 
+    glm::mat4 projection(1.0f), view(1.0f), model(1.0f);
+    model = glm::rotate(model, glm::radians(-45.0f), glm::vec3(1.0f, .0f, .0f));
+    view = glm::translate(view, glm::vec3(.0f, .0f, -1.0f));
+    // 教程中提到, 一般设置视野角度(Field of View, fov) 为 45.0f, 获得一个真实的观察效果.
+    // 可以设置一个更大的值来获得一个末日风格的效果.
+    // 函数的第二个参数为宽高比, 由视口(viewport)的宽除以高所得.
+    projection = glm::perspective(glm::radians(90.0f), 1.0f, .1f, 100.0f);
+
+    //
+    glm::mat4 m4(1.0f);
+//    m4 = glm::translate(m4, glm::vec3(.5f, -.5f, .0f));
+////    m4 = glm::rotate(m4, glm::radians(40.0f), glm::vec3(.0f, .0f, 1.0f));
+//    m4 = glm::rotate(m4, static_cast<float>(glfwGetTime()), glm::vec3(.0f, .0f, 1.0f));
+//    m4 = glm::scale(m4, glm::vec3(.5f, .5f, .5f));
+
+    // 此时, 在片段着色器 fragment 中仅定义了一个 mat4; 也可以 定义三个 mat4, 然后
+    // 在 fragment 中进行三个 mat4 的乘法, 同样, 也是从右向左执行.
+    m4 = projection * view * model;
+
+    unsigned int transform_location = glGetUniformLocation(shader_program, "trans");
+    glUniformMatrix4fv(transform_location, 1, GL_FALSE, glm::value_ptr(m4));
 
     while(!glfwWindowShouldClose(window)) {
         glClear(GL_COLOR_BUFFER_BIT);
 
-        //
-        glm::mat4 m4(1.0f);
-        m4 = glm::translate(m4, glm::vec3(.5f, -.5f, .0f));
-    //    m4 = glm::rotate(m4, glm::radians(40.0f), glm::vec3(.0f, .0f, 1.0f));
-        m4 = glm::rotate(m4, static_cast<float>(glfwGetTime()), glm::vec3(.0f, .0f, 1.0f));
-        m4 = glm::scale(m4, glm::vec3(.5f, .5f, .5f));
-        unsigned int transform_location = glGetUniformLocation(shader_program, "trans");
-        glUniformMatrix4fv(transform_location, 1, GL_FALSE, glm::value_ptr(m4));
 
         {
             double time_value = glfwGetTime();
