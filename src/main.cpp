@@ -37,6 +37,11 @@ static bool ValidateExe(const char* flagname, uint32_t value) {
         fun_exe = &HelloVertexColor;
         break;
     }
+    case 4: {
+        // 显示 3D.
+        fun_exe = &Hello3D;
+        break;
+    }
     default: {
         fun_exe = [value](){ std::cout << "not support 'exe' value:" << value << std::endl; };
         assert(false);
