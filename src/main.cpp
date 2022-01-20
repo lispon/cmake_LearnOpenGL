@@ -59,7 +59,8 @@ DEFINE_validator(exe, &ValidateExe);
 int main(int argc, char* argv[]) {
     std::cout << "VERSION:" << VERSION_MAJOR << "." << VERSION_MINOR << "." << VERSION_PATCH << std::endl;
 
-    HelloGlm();
+//    HelloGlm();
+//    CustomLookAt();
 
     gflags::SetUsageMessage("usageMessage.");
     gflags::SetVersionString("0.0.1");

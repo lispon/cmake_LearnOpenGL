@@ -69,4 +69,48 @@ void HelloGlm() {
     std::cout << "e n d:  hello glm:-------------" << std::endl;
 }
 
+void CustomLookAt() {
+    const glm::vec4 test_v4(1.1f, 2.2f, 3.3f, 4.4f);
+
+    const glm::vec3 camera_pos(.0f, .0f, 3.0f);     // 摄像机位置.
+    const glm::vec3 camera_target(.0f, .0f, .0f);   // 观察目标中心点.
+    const glm::vec3 camera_up(.0f, 1.0f, .0f);      // 上向量.
+
+    const glm::mat4 lookat_view = glm::lookAt(camera_pos, camera_target, camera_up);
+    auto v4 = lookat_view * test_v4;
+    std::cout << "lookat_view:" << v4.x << "," << v4.y << "," << v4.z << "," << v4.w << std::endl;
+
+    // 自己实现 lookat 矩阵.
+    {
+        glm::vec3 camera_direction = glm::normalize(camera_pos - camera_target);
+        glm::vec3 up = glm::vec3(.0f, 1.0f, .0f);
+        glm::vec3 camera_right = glm::normalize(glm::cross(up, camera_direction));
+        glm::vec3 camera_up = glm::cross(camera_direction, camera_right);
+
+        glm::mat4 clookat_view(1.0f), l4(1.0f), r4(1.0f);
+
+        // l4
+        l4[0][0] = camera_right.x;
+        l4[0][1] = camera_right.y;
+        l4[0][2] = camera_right.z;
+
+        l4[1][0] = camera_up.x;
+        l4[1][1] = camera_up.y;
+        l4[1][2] = camera_up.z;
+
+        l4[2][0] = camera_direction.x;
+        l4[2][1] = camera_direction.y;
+        l4[2][2] = camera_direction.z;
+
+        // r4
+        r4[3][0] = -camera_pos.x;
+        r4[3][1] = -camera_pos.y;
+        r4[3][2] = -camera_pos.z;
+
+        clookat_view = l4 * r4;
+        auto v4 = clookat_view * test_v4;
+        std::cout << "clookat_view:" << v4.x << "," << v4.y << "," << v4.z << "," << v4.w << std::endl;
+    }
+}
+
 #endif // GLM_DEMO_H

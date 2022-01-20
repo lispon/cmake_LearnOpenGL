@@ -291,6 +291,23 @@ int Triangle(int type) {
     //    m4 = glm::rotate(m4, static_cast<float>(glfwGetTime()), glm::vec3(.0f, .0f, 1.0f));
     //    m4 = glm::scale(m4, glm::vec3(.5f, .5f, .5f));
 
+        // 摄像机lookAt.
+        const float radius = 10.0f;
+        const float cam_x = sin(glfwGetTime()) * radius;
+        const float cam_z = cos(glfwGetTime()) * radius;
+#if 1
+        view = glm::lookAt(glm::vec3(cam_x, .0f, cam_z),
+                           glm::vec3(.0f, .0f, .0f),
+                           glm::vec3(.0f, 1.0f, .0f)
+                           );
+#else
+     // 自定义实现 lookAt 功能.
+     const glm::vec3 camera_pos(cam_x, .0f, cam_z);
+     const glm::vec3 camera_target(.0f, .0f, .0f);
+     const glm::vec3 camera_up(.0f, 1.0f, .0f);
+     glm::vec3 v_r;
+#endif
+
         // 此时, 在片段着色器 fragment 中仅定义了一个 mat4; 也可以 定义三个 mat4, 然后
         // 在 fragment 中进行三个 mat4 的乘法, 同样, 也是从右向左执行.
         m4 = projection * view * model;
