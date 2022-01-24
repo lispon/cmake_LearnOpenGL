@@ -19,16 +19,13 @@
 #include <functional>
 #include <iostream>
 
+#include "camera_fps_euler.h"
+
 namespace triangle {
 
 void frame_buffer_size_callback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
 }
-
-glm::vec3 camera_pos_ = glm::vec3(.0f, .0f, 3.0f);
-glm::vec3 camera_front_ = glm::vec3(.0f, .0f, -1.0f);
-glm::vec3 camera_target_ = glm::vec3(.0f, .0f, .0f);
-glm::vec3 camera_up_ = glm::vec3(.0f, 1.0f, .0f);
 
 //
 float last_time_ = .0f;
@@ -38,35 +35,34 @@ float delta_time_ = .0f;
 bool first_mouse_ = true;
 float x_last = .0f;
 float y_last = .0f;
-float pitch_ = .0f;
-// yaw is initialized to -90.0 degrees
-// since a yaw of 0.0 results in a direction vector pointing to the right
-// so we initially rotate a bit to the left.
-float yaw_ = -90.0f;
-float fov_ = 45.0f;
+
+
+CameraFPS_euler camera_(glm::vec3(.0f, .0f, 3.0f));
+
 
 void processInput(GLFWwindow* window) {
     const float camera_speed = 2.5f * delta_time_;
 
     if(GLFW_PRESS == glfwGetKey(window, GLFW_KEY_ESCAPE)) {
-        glfwTerminate();
+//        glfwTerminate();
+        glfwSetWindowShouldClose(window, true);
     }
 
     // 分两次判断, 可以同时向左或向前(即两个方向上)移动; 否则, 只能进行一个方向的移动.
     if(GLFW_PRESS == glfwGetKey(window, GLFW_KEY_W)) {
         // 向前.
-        camera_pos_ += camera_speed * camera_front_;
+        camera_.ProcessKeyboard(CameraFPS_euler::FORWARD, delta_time_);
     } else if(GLFW_PRESS == glfwGetKey(window, GLFW_KEY_S)) {
         // 向后.
-        camera_pos_ -= camera_speed * camera_front_;
+        camera_.ProcessKeyboard(CameraFPS_euler::BACKWARD, delta_time_);
     }
 
     if(GLFW_PRESS == glfwGetKey(window, GLFW_KEY_A)) {
         // 向左.
-        camera_pos_ -= glm::normalize(glm::cross(camera_front_, camera_up_)) * camera_speed;
+        camera_.ProcessKeyboard(CameraFPS_euler::LEFT, delta_time_);
     } else if(GLFW_PRESS == glfwGetKey(window, GLFW_KEY_D)) {
         // 向右.
-        camera_pos_ += glm::normalize(glm::cross(camera_front_, camera_up_)) * camera_speed;
+        camera_.ProcessKeyboard(CameraFPS_euler::RIGHT, delta_time_);
     }
 }
 
@@ -75,49 +71,18 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
         x_last = static_cast<float>(xpos);
         y_last = static_cast<float>(ypos);
         first_mouse_ = false;
-//        return;
     }
 
     float x_offset = xpos - x_last;
-    float y_offset = y_last - ypos;
+    float y_offset = y_last - ypos; // reversed since y-coordinates go from bottom to top
     x_last = xpos;
     y_last = ypos;
 
-    const float sensitivity = .05f;
-    x_offset *= sensitivity;
-    y_offset *= sensitivity;
-
-    yaw_ += x_offset;
-    pitch_ += y_offset;
-
-    if(89.0f < pitch_) {
-        pitch_ = 89.0f;
-    }
-    if(-89.0f > pitch_) {
-        pitch_ = -89.0f;
-    }
-
-    glm::vec3 front;
-    front.x = cos(glm::radians(yaw_)) * cos(glm::radians(pitch_));
-    front.y = sin(glm::radians(pitch_));
-    front.z = sin(glm::radians(yaw_)) * cos(glm::radians(pitch_));
-    camera_front_ = glm::normalize(front);
+    camera_.ProcessMouseMovement(x_offset, y_offset);
 }
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
-    // xoffset 基本固定为0, 向上yoffset=1, 向下yoffset=-1
-//    std::cout << "scroll_callback:" << xoffset << yoffset << std::endl;
-    const float min_fov = 1.0f;
-    const float max_fov = 90.0f;
-    if(min_fov <= fov_ && max_fov >= fov_) {
-        fov_ -= yoffset;
-    }
-    if(min_fov >= fov_) {
-        fov_ = min_fov;
-    }
-    if(max_fov <= fov_) {
-        fov_ = max_fov;
-    }
+    camera_.ProcessMouseScroll(static_cast<float>(yoffset));
 }
 
 int Triangle(int type) {
@@ -142,7 +107,6 @@ int Triangle(int type) {
         glfwTerminate();
         return -1;
     }
-
 
     unsigned int vertex_shader = { 0 };
     const char* vertex_shader_source = "#version 330 core\n"
@@ -394,7 +358,7 @@ int Triangle(int type) {
         // 教程中提到, 一般设置视野角度(Field of View, fov) 为 45.0f, 获得一个真实的观察效果.
         // 可以设置一个更大的值来获得一个末日风格的效果.
         // 函数的第二个参数为宽高比, 由视口(viewport)的宽除以高所得.
-        projection = glm::perspective(glm::radians(fov_), float(4.0/3.0), .1f, 100.0f);
+        projection = glm::perspective(glm::radians(camera_.GetZoom()), float(4.0/3.0), .1f, 100.0f);
         //
         glm::mat4 m4(1.0f);
     //    m4 = glm::translate(m4, glm::vec3(.5f, -.5f, .0f));
@@ -407,20 +371,10 @@ int Triangle(int type) {
             const float radius = 10.0f;
             const float cam_x = sin(glfwGetTime()) * radius;
             const float cam_z = cos(glfwGetTime()) * radius;
-            camera_pos_.x = cam_x;
-            camera_pos_.y = .0f;
-            camera_pos_.z = cam_z;
         } else {
-            camera_target_ = camera_pos_ + camera_front_;
-//            camera_pos_ = glm::vec3(.0f, .0f, 3.0f);
-//            camera_target_ = glm::vec3(.0f, .0f, .0f);
-//            camera_up_ = glm::vec3(.0, 1.0f, .0f);
         }
 #if 1
-        view = glm::lookAt(camera_pos_,
-                           camera_target_,
-                           camera_up_
-                           );
+        view = camera_.GetViewMatrix();
 #else
      // 自定义实现 lookAt 功能.
      const glm::vec3 camera_pos(cam_x, .0f, cam_z);
