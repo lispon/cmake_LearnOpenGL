@@ -43,6 +43,7 @@ static bool ValidateExe(const char* flagname, uint32_t value) {
     case 5: {
         // 使用键盘中 wasd 控制摄像头.
         fun_exe = &HelloWASD;
+        break;
     }
     default: {
         fun_exe = [value](){ std::cout << "not support 'exe' value:" << value << std::endl; };

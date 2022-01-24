@@ -27,19 +27,27 @@ void frame_buffer_size_callback(GLFWwindow* window, int width, int height) {
 
 glm::vec3 camera_pos_ = glm::vec3(.0f, .0f, 3.0f);
 glm::vec3 camera_front_ = glm::vec3(.0f, .0f, -1.0f);
+glm::vec3 camera_target_ = glm::vec3(.0f, .0f, .0f);
 glm::vec3 camera_up_ = glm::vec3(.0f, 1.0f, .0f);
 
+float last_time_ = .0f;
+float delta_time_ = .0f;
+
 void processInput(GLFWwindow* window) {
-    const float camera_speed = .05f;
+    const float camera_speed = 2.5f * delta_time_;
 
     if(GLFW_PRESS == glfwGetKey(window, GLFW_KEY_W)) {
         // 向前.
+        camera_pos_ += camera_speed * camera_front_;
     } else if(GLFW_PRESS == glfwGetKey(window, GLFW_KEY_S)) {
         // 向后.
+        camera_pos_ -= camera_speed * camera_front_;
     } else if(GLFW_PRESS == glfwGetKey(window, GLFW_KEY_A)) {
         // 向左.
+        camera_pos_ -= glm::normalize(glm::cross(camera_front_, camera_up_)) * camera_speed;
     } else if(GLFW_PRESS == glfwGetKey(window, GLFW_KEY_D)) {
         // 向右.
+        camera_pos_ += glm::normalize(glm::cross(camera_front_, camera_up_)) * camera_speed;
     }
 }
 
@@ -179,7 +187,7 @@ int Triangle(int type) {
         int size_vertices = sizeof(vertices1);
         float* vertices = vertices1;
 
-        if(4 == type) {
+        if(4 == type || 5 == type) {
             float vertices2[] = {
                 -0.5f, -0.5f, -0.5f,      1.0f, 0.0f, 0.0f,          0.0f, 0.0f,
                  0.5f, -0.5f, -0.5f,      1.0f, 1.0f, 0.0f,          1.0f, 0.0f,
@@ -252,6 +260,8 @@ int Triangle(int type) {
             //
         } else if(4 == type) {
             //
+        } else if(5 == type) {
+            //
         } else {
             glfwTerminate();
             assert(false);
@@ -295,6 +305,10 @@ int Triangle(int type) {
     while(!glfwWindowShouldClose(window)) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        const float cur_time = static_cast<float>(glfwGetTime());
+        delta_time_ = cur_time - last_time_;
+        last_time_ = cur_time;
+
         triangle::processInput(window);
 
         glm::mat4 projection(1.0f), view(1.0f), model(1.0f);
@@ -320,13 +334,15 @@ int Triangle(int type) {
             camera_pos_.x = cam_x;
             camera_pos_.y = .0f;
             camera_pos_.z = cam_z;
-
-            camera_front_ = glm::vec3(.0f, .0f, .0f);
-            camera_up_ = glm::vec3(.0f, 1.0f, .0f);
+        } else {
+            camera_target_ = camera_pos_ + camera_front_;
+//            camera_pos_ = glm::vec3(.0f, .0f, 3.0f);
+//            camera_target_ = glm::vec3(.0f, .0f, .0f);
+//            camera_up_ = glm::vec3(.0, 1.0f, .0f);
         }
 #if 1
         view = glm::lookAt(camera_pos_,
-                           camera_front_,
+                           camera_target_,
                            camera_up_
                            );
 #else
@@ -373,7 +389,7 @@ int Triangle(int type) {
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         } else if(3 == type) {
             glDrawArrays(GL_TRIANGLES, 0, 3);
-        } else if(4 == type) {
+        } else if(4 == type || 5 == type) {
             for(int i = 0; i < cube_size; ++i) {
                 glm::mat4 model(1.0f);
                 model = glm::translate(model, cube_positions[i]);
