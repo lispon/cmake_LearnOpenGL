@@ -43,6 +43,7 @@ float pitch_ = .0f;
 // since a yaw of 0.0 results in a direction vector pointing to the right
 // so we initially rotate a bit to the left.
 float yaw_ = -90.0f;
+float fov_ = 45.0f;
 
 void processInput(GLFWwindow* window) {
     const float camera_speed = 2.5f * delta_time_;
@@ -103,6 +104,22 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
     camera_front_ = glm::normalize(front);
 }
 
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
+    // xoffset 基本固定为0, 向上yoffset=1, 向下yoffset=-1
+//    std::cout << "scroll_callback:" << xoffset << yoffset << std::endl;
+    const float min_fov = 1.0f;
+    const float max_fov = 90.0f;
+    if(min_fov <= fov_ && max_fov >= fov_) {
+        fov_ -= yoffset;
+    }
+    if(min_fov >= fov_) {
+        fov_ = min_fov;
+    }
+    if(max_fov <= fov_) {
+        fov_ = max_fov;
+    }
+}
+
 int Triangle(int type) {
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -112,6 +129,7 @@ int Triangle(int type) {
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, frame_buffer_size_callback);
     glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetScrollCallback(window, scroll_callback);
 
     // GLFW_CURSOR_DISABLED 会捕获焦点并隐藏鼠标指针, 移动鼠标不会让该窗口丢失焦点.
     // GLFW_CURSOR_HIDDEN 仅会隐藏鼠标, 移动鼠标可以让该窗口丢失焦点.
@@ -376,7 +394,7 @@ int Triangle(int type) {
         // 教程中提到, 一般设置视野角度(Field of View, fov) 为 45.0f, 获得一个真实的观察效果.
         // 可以设置一个更大的值来获得一个末日风格的效果.
         // 函数的第二个参数为宽高比, 由视口(viewport)的宽除以高所得.
-        projection = glm::perspective(glm::radians(90.0f), float(4.0/3.0), .1f, 100.0f);
+        projection = glm::perspective(glm::radians(fov_), float(4.0/3.0), .1f, 100.0f);
         //
         glm::mat4 m4(1.0f);
     //    m4 = glm::translate(m4, glm::vec3(.5f, -.5f, .0f));
