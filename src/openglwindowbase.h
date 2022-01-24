@@ -1,12 +1,11 @@
 ﻿#ifndef OPENGLWINDOWBASE_H
 #define OPENGLWINDOWBASE_H
 
-#include "shader.h"
-
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
 
 #include <iostream>
+#include <cassert>
 
 class OpenGLWindowBase {
   public:

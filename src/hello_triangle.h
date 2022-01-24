@@ -19,8 +19,28 @@
 #include <functional>
 #include <iostream>
 
+namespace triangle {
+
 void frame_buffer_size_callback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
+}
+
+glm::vec3 camera_pos_ = glm::vec3(.0f, .0f, 3.0f);
+glm::vec3 camera_front_ = glm::vec3(.0f, .0f, -1.0f);
+glm::vec3 camera_up_ = glm::vec3(.0f, 1.0f, .0f);
+
+void processInput(GLFWwindow* window) {
+    const float camera_speed = .05f;
+
+    if(GLFW_PRESS == glfwGetKey(window, GLFW_KEY_W)) {
+        // 向前.
+    } else if(GLFW_PRESS == glfwGetKey(window, GLFW_KEY_S)) {
+        // 向后.
+    } else if(GLFW_PRESS == glfwGetKey(window, GLFW_KEY_A)) {
+        // 向左.
+    } else if(GLFW_PRESS == glfwGetKey(window, GLFW_KEY_D)) {
+        // 向右.
+    }
 }
 
 int Triangle(int type) {
@@ -275,6 +295,7 @@ int Triangle(int type) {
     while(!glfwWindowShouldClose(window)) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        triangle::processInput(window);
 
         glm::mat4 projection(1.0f), view(1.0f), model(1.0f);
         model = glm::rotate(model, static_cast<float>(glfwGetTime()) * glm::radians(50.0f),
@@ -292,13 +313,21 @@ int Triangle(int type) {
     //    m4 = glm::scale(m4, glm::vec3(.5f, .5f, .5f));
 
         // 摄像机lookAt.
-        const float radius = 10.0f;
-        const float cam_x = sin(glfwGetTime()) * radius;
-        const float cam_z = cos(glfwGetTime()) * radius;
+        if(5 != type) {
+            const float radius = 10.0f;
+            const float cam_x = sin(glfwGetTime()) * radius;
+            const float cam_z = cos(glfwGetTime()) * radius;
+            camera_pos_.x = cam_x;
+            camera_pos_.y = .0f;
+            camera_pos_.z = cam_z;
+
+            camera_front_ = glm::vec3(.0f, .0f, .0f);
+            camera_up_ = glm::vec3(.0f, 1.0f, .0f);
+        }
 #if 1
-        view = glm::lookAt(glm::vec3(cam_x, .0f, cam_z),
-                           glm::vec3(.0f, .0f, .0f),
-                           glm::vec3(.0f, 1.0f, .0f)
+        view = glm::lookAt(camera_pos_,
+                           camera_front_,
+                           camera_up_
                            );
 #else
      // 自定义实现 lookAt 功能.
@@ -370,21 +399,27 @@ int Triangle(int type) {
     return 0;
 }
 
+}
 
 int HelloTriangle() {
-    return Triangle(1);
+    return triangle::Triangle(1);
 }
 
 int HelloRectangle() {
-    return Triangle(2);
+    return triangle::Triangle(2);
 }
 
 int HelloVertexColor() {
-    return Triangle(3);
+    return triangle::Triangle(3);
 }
 
 int Hello3D() {
-    return Triangle(4);
+    return triangle::Triangle(4);
 }
+
+int HelloWASD() {
+    return triangle::Triangle(5);
+}
+
 
 #endif // HELLO_TRIANGLE_H

@@ -1,6 +1,4 @@
 ﻿#include "config.h"
-#include "startshader.h"
-#include "starttextures.h"
 
 #include "hello_window.h"
 #include "hello_triangle.h"
@@ -41,6 +39,10 @@ static bool ValidateExe(const char* flagname, uint32_t value) {
         // 显示 3D.
         fun_exe = &Hello3D;
         break;
+    }
+    case 5: {
+        // 使用键盘中 wasd 控制摄像头.
+        fun_exe = &HelloWASD;
     }
     default: {
         fun_exe = [value](){ std::cout << "not support 'exe' value:" << value << std::endl; };
